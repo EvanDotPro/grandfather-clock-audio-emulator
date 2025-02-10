@@ -115,10 +115,10 @@
         function getNextChime() {
             const date = new Date();
             const minutes = date.getMinutes() + minOffset;
-            const hours = date.getHours() % 12 || 12;
+            const hours = (date.getHours()+1) % 12 || 12;
 
             return {
-                chime: minutes < 15 ? 'one-quarter-chime' : minutes < 30 ? 'half-chime' : minutes < 45 ? 'three-quarter-chime' : (hours + 1),
+                chime: minutes < 15 ? 'one-quarter-chime' : minutes < 30 ? 'half-chime' : minutes < 45 ? 'three-quarter-chime' : hours,
                 time: minutes < 15 ? 15 - minutes : minutes < 30 ? 30 - minutes : minutes < 45 ? 45 - minutes : 60 - minutes
             }
         }
