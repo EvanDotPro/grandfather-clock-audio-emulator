@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grandfather Clock Audio Emulator</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            font-size: 2em;
+        }
+        audio {
+            width: 100%;
+            max-width: 300px;
+        }
+        input[type="range"] {
+            width: 100%;
+            max-width: 300px;
+        }
+        input[type="number"] {
+            width: 50px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Grandfather Clock Audio Emulator</h1>
+
+    <h3>Next chime: <span id="nextChime"></span> in <span id="nextChimeMins"></span> minute(s).</h3>
+    <h4>Prev chime: <span id="prevChime"></span> <span id="prevChimeMins"></span> minute(s) ago.</h4>
+
+    <br><br>
+    🔊 <input type="range" id="volume" min="0" max="1" step="0.01" value="0.2" oninput="this.nextElementSibling.value = this.value">
+        <input type="number" value="0.2" step="0.01" oninput="this.previousElementSibling.value = this.value">
+    
+    <br><br>
+
+    ⏩ <input type="range" id="playbackRate" min="0.5" max="1.5" step="0.01" value="0.88" oninput="this.nextElementSibling.value = this.value">
+        <input type="number" value="0.88" step="0.01" oninput="this.previousElementSibling.value = this.value">
+    <br><br>
+    <button id="replay" onclick="playPreviousChime();">Replay Last Chime</button>
+
+    <script>
+        const clockAudio = new Audio();
+        const replayAudio = new Audio();
+        const minOffset = 0; // for testing
+        
+        function playSound(file, audio, fadeInAndOut = true) {
+            const volume = parseFloat(document.getElementById('volume').value);
+            const playbackRate = parseFloat(document.getElementById('playbackRate').value);
+            console.log('Playing sound', file, audio, volume, playbackRate);
+            audio.src = file;
+            audio.volume = 0;
+            audio.playbackRate = playbackRate;
+            if (fadeInAndOut) {
+                audio.volume = 0;
+                audio.play();
+                const fadeInterval = setInterval(() => {
+                    audio.volume += Math.min(volume, audio.volume +0.05);
+                    if (audio.volume >= volume) {
+                        clearInterval(fadeInterval);
+                    }
+                }, 50);
+                setTimeout(() => {
+                    const fadeOutInterval = setInterval(() => {
+                        audio.volume = Math.max(0, audio.volume - 0.05);
+                        if (audio.volume <= 0) {
+                            clearInterval(fadeOutInterval);
+                        }
+                    }, 50);
+                }, audio.duration * 1000 - 1000);
+            } else {
+                audio.play();
+            }
+        }
+
+        function playPreviousChime() {
+            const prevChime = getPrevChime();
+            const chimeFile = `./sounds/${prevChime.chime}.mp3`;
+            playSound(chimeFile, replayAudio);
+        }
+
+        function playChimeIfNecessary() {
+            const nextChime = getPrevChime(); // not a type
+            const baseUrl = window.location.href.replace('index.html', '');
+            const chimeFile = `${baseUrl}sounds/${nextChime.chime}.mp3`;
+            if (clockAudio.src !== chimeFile) {
+                playSound(chimeFile, clockAudio);
+            }
+        }
+
+        function getPrevChime() {
+            const date = new Date();
+            const minutes = date.getMinutes() + minOffset;
+            const hours = date.getHours() % 12 || 12;
+
+            return {
+                chime: minutes < 15 ? hours : minutes < 30 ? 'one-quarter-chime' : minutes < 45 ? 'half-chime' : 'three-quarter-chime',
+                time: minutes < 15 ? minutes : minutes < 30 ? minutes - 15 : minutes < 45 ? minutes - 30 : minutes - 45
+            }
+        }
+
+        function getNextChime() {
+            const date = new Date();
+            const minutes = date.getMinutes() + minOffset;
+            const hours = date.getHours() % 12 || 12;
+
+            return {
+                chime: minutes < 15 ? 'one-quarter-chime' : minutes < 30 ? 'half-chime' : minutes < 45 ? 'three-quarter-chime' : (hours + 1),
+                time: minutes < 15 ? 15 - minutes : minutes < 30 ? 30 - minutes : minutes < 45 ? 45 - minutes : 60 - minutes
+            }
+        }
+
+        document.getElementById('volume').addEventListener('input', () => {
+            clockAudio.volume = parseFloat(document.getElementById('volume').value);
+            replayAudio.volume = parseFloat(document.getElementById('volume').value);
+        });
+        
+        document.getElementById('playbackRate').addEventListener('input', () => {
+            clockAudio.playbackRate = parseFloat(document.getElementById('playbackRate').value);
+            replayAudio.playbackRate = parseFloat(document.getElementById('playbackRate').value);
+        });
+
+        const prevChime = getPrevChime();
+        const prevChimeFile = `./sounds/${prevChime.chime}.mp3`;
+        clockAudio.src = prevChimeFile;
+
+        function tick() {
+            var nextChime = getNextChime();
+            document.getElementById('nextChime').innerText = nextChime.chime;
+            document.getElementById('nextChimeMins').innerText = nextChime.time;
+
+            var prevChime = getPrevChime();
+            document.getElementById('prevChime').innerText = prevChime.chime;
+            document.getElementById('prevChimeMins').innerText = prevChime.time;
+
+            playChimeIfNecessary();
+            setTimeout(tick, 1000);
+        }
+        tick();
+    </script>
+</body>
+</html>
