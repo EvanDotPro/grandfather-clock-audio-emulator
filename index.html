@@ -139,11 +139,11 @@
 
         function tick() {
             var nextChime = getNextChime();
-            document.getElementById('nextChime').innerText = !isNaN(nextChime.chime) ? `${nextChime.chime}-hour` : nextChime.chime;
+            document.getElementById('nextChime').innerText = !isNaN(nextChime.chime) ? `hour-${nextChime.chime}-chime` : nextChime.chime;
             document.getElementById('nextChimeMins').innerText = nextChime.time;
 
             var prevChime = getPrevChime();
-            document.getElementById('prevChime').innerText = !isNaN(prevChime.chime) ? `${prevChime.chime}-hour` : prevChime.chime;
+            document.getElementById('prevChime').innerText = !isNaN(prevChime.chime) ? `hour-${prevChime.chime}-chime` : prevChime.chime;
             document.getElementById('prevChimeMins').innerText = prevChime.time;
 
             playChimeIfNecessary();
