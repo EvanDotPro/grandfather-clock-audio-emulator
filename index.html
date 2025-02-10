@@ -32,16 +32,26 @@
     <h4>Prev chime: <span id="prevChime"></span> <span id="prevChimeMins"></span> minute(s) ago.</h4>
 
     <br><br>
+
     🔊 <input type="range" id="volume" min="0" max="1" step="0.01" value="0.2" oninput="this.nextElementSibling.value = this.value">
         <input type="number" value="0.2" step="0.01" oninput="this.previousElementSibling.value = this.value">
-    
+
     <br><br>
 
     ⏩ <input type="range" id="playbackRate" min="0.5" max="1.5" step="0.01" value="0.88" oninput="this.nextElementSibling.value = this.value">
         <input type="number" value="0.88" step="0.01" oninput="this.previousElementSibling.value = this.value">
-    <br><br>
+
+        <br><br>
+
     <button id="replay" onclick="playPreviousChime();">Replay Last Chime</button>
 
+    <br><br>
+    <hr>
+
+    <small>
+        Grandfather clock chime samples are <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">Creative Commons 4.0</a> courtesy of <a href="https://freesound.org/people/joedeshon/packs/7926/" target="_blank">Joe Deshon</a>.
+        Available on <a href="https://github.com/EvanDotPro/grandfather-clock-audio-emulator" target="_blank">GitHub</a>.
+    </small>
     <script>
         const clockAudio = new Audio();
         const replayAudio = new Audio();
@@ -129,11 +139,11 @@
 
         function tick() {
             var nextChime = getNextChime();
-            document.getElementById('nextChime').innerText = nextChime.chime;
+            document.getElementById('nextChime').innerText = !isNaN(nextChime.chime) ? `${nextChime.chime}-hour` : nextChime.chime;
             document.getElementById('nextChimeMins').innerText = nextChime.time;
 
             var prevChime = getPrevChime();
-            document.getElementById('prevChime').innerText = prevChime.chime;
+            document.getElementById('prevChime').innerText = !isNaN(prevChime.chime) ? `${prevChime.chime}-hour` : prevChime.chime;
             document.getElementById('prevChimeMins').innerText = prevChime.time;
 
             playChimeIfNecessary();
